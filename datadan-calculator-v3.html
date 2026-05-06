@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Retirement Calculator — Data Dan the Money Man</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:             #FAFAF8;
+      --surface:        #FFFFFF;
+      --text-primary:   #111111;
+      --text-secondary: #555555;
+      --text-muted:     #999999;
+      --accent:         #2563EB;
+      --accent-warm:    #F59E0B;
+      --border:         #E5E5E5;
+      --font-display:   'Plus Jakarta Sans', sans-serif;
+      --font-body:      'DM Sans', sans-serif;
+      --space-sm:  1rem;
+      --space-md:  2rem;
+      --space-lg:  4rem;
+      --space-xl:  8rem;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-weight: 400;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      padding: 1.25rem var(--space-md);
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+    nav.scrolled {
+      background: rgba(250,250,248,0.92);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      box-shadow: 0 1px 0 var(--border);
+    }
+    .nav-brand { font-family: var(--font-display); font-weight: 800; font-size: 1.1rem; color: var(--text-primary); text-decoration: none; letter-spacing: -0.02em; }
+    .nav-brand span { color: var(--accent); }
+    .nav-links { display: flex; align-items: center; gap: var(--space-md); list-style: none; }
+    .nav-links a { font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); text-decoration: none; transition: color 0.2s; }
+    .nav-links a:hover { color: var(--text-primary); }
+    .nav-cta { background: var(--accent); color: #fff !important; padding: 0.55rem 1.25rem; border-radius: 6px; font-weight: 500 !important; transition: background 0.2s, transform 0.2s !important; }
+    .nav-cta:hover { background: #1d4ed8 !important; transform: translateY(-1px); }
+
+    /* ── HERO ── */
+    .hero {
+      padding: 10rem var(--space-md) 4rem; text-align: center; position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(37,99,235,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-eyebrow {
+      display: inline-flex; align-items: center; gap: 0.5rem;
+      font-size: 0.8rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--accent); background: rgba(37,99,235,0.08); border: 1px solid rgba(37,99,235,0.15);
+      padding: 0.4rem 0.9rem; border-radius: 100px; margin-bottom: var(--space-md);
+    }
+    .hero h1 {
+      font-family: var(--font-display); font-weight: 800;
+      font-size: clamp(2.6rem, 7vw, 5rem); line-height: 1.0; letter-spacing: -0.03em;
+      max-width: 16ch; margin: 0 auto var(--space-md);
+    }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero-sub { font-size: clamp(1rem, 2vw, 1.15rem); font-weight: 300; color: var(--text-secondary); max-width: 48ch; margin: 0 auto; line-height: 1.75; }
+
+    /* ── CALCULATOR LAYOUT ── */
+    .calc-section { padding: var(--space-lg) var(--space-md) var(--space-xl); }
+    .calc-inner { max-width: 1140px; margin: 0 auto; display: grid; grid-template-columns: 400px 1fr; gap: 1.5rem; align-items: start; }
+
+    /* ── INPUTS PANEL ── */
+    .inputs-panel {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+      padding: 1.5rem; position: sticky; top: 6rem;
+    }
+    .inputs-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border);
+    }
+    .inputs-header h3 { font-family: var(--font-display); font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; }
+    .reset-btn {
+      font-size: 0.75rem; font-weight: 500; color: var(--text-muted);
+      background: none; border: 1px solid var(--border); border-radius: 6px;
+      padding: 0.3rem 0.7rem; cursor: pointer; transition: all 0.2s;
+      font-family: var(--font-body);
+    }
+    .reset-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(37,99,235,0.05); }
+
+    /* Input groups */
+    .input-group { margin-bottom: 1.2rem; }
+    .input-label {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.8rem; font-weight: 500; color: var(--text-secondary); margin-bottom: 0.45rem;
+    }
+    .input-label-text { display: flex; align-items: center; gap: 0.35rem; }
+
+    /* Editable value badge */
+    .val-badge {
+      font-family: var(--font-display); font-weight: 700; font-size: 0.9rem;
+      color: var(--text-primary); cursor: pointer; border-bottom: 1px dashed var(--border);
+      transition: border-color 0.2s, color 0.2s; padding-bottom: 1px;
+    }
+    .val-badge:hover { color: var(--accent); border-color: var(--accent); }
+    .val-input-inline {
+      font-family: var(--font-display); font-weight: 700; font-size: 0.9rem;
+      color: var(--accent); border: none; border-bottom: 2px solid var(--accent);
+      background: transparent; outline: none; width: 80px; text-align: right;
+      padding-bottom: 1px;
+    }
+
+    /* Range slider */
+    input[type="range"] {
+      width: 100%; height: 4px; -webkit-appearance: none; appearance: none;
+      background: var(--border); border-radius: 2px; outline: none; cursor: pointer;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+      background: var(--accent); border: 2px solid #fff;
+      box-shadow: 0 1px 4px rgba(37,99,235,0.3); cursor: pointer;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--accent); border: 2px solid #fff; cursor: pointer;
+    }
+    .range-bounds { display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-muted); margin-top: 0.3rem; }
+
+    /* Current balance input */
+    .balance-input-wrap { position: relative; margin-bottom: 1.2rem; }
+    .balance-prefix { position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%); font-family: var(--font-display); font-weight: 700; font-size: 0.9rem; color: var(--text-muted); pointer-events: none; }
+    .balance-field {
+      width: 100%; padding: 0.6rem 0.85rem 0.6rem 1.5rem;
+      border: 1px solid var(--border); border-radius: 8px;
+      font-family: var(--font-display); font-weight: 700; font-size: 0.9rem;
+      color: var(--text-primary); background: var(--bg); outline: none;
+      transition: border-color 0.2s;
+    }
+    .balance-field:focus { border-color: var(--accent); background: var(--surface); }
+
+    /* Section divider within inputs */
+    .input-section-label {
+      font-size: 0.68rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--text-muted); margin: 1.25rem 0 0.85rem;
+      padding-top: 1rem; border-top: 1px solid var(--border);
+    }
+
+    /* Buttons */
+    .calc-btn {
+      width: 100%; background: var(--accent); color: #fff; border: none; border-radius: 8px;
+      padding: 0.85rem; cursor: pointer; font-family: var(--font-body); font-size: 0.95rem;
+      font-weight: 600; transition: background 0.2s, transform 0.2s; letter-spacing: -0.01em;
+      margin-top: 1.25rem;
+    }
+    .calc-btn:hover { background: #1d4ed8; transform: translateY(-1px); }
+
+    /* ── RESULTS PANEL ── */
+    .results-panel { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    /* Callout card */
+    .callout-card {
+      background: #2563EB; border-radius: 16px;
+      padding: 1.75rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+      position: relative; overflow: hidden;
+    }
+    .callout-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 80% at 80% 50%, rgba(255,255,255,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .callout-stat { position: relative; }
+    .callout-stat-label { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.65); margin-bottom: 0.4rem; }
+    .callout-stat-num { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.8rem, 3.5vw, 2.5rem); letter-spacing: -0.03em; line-height: 1; color: #fff; }
+    .callout-stat-num.accent { color: #FDE68A; }
+    .callout-stat-sub { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-top: 0.3rem; }
+    .callout-insight {
+      grid-column: 1 / -1; border-top: 1px solid rgba(255,255,255,0.2);
+      padding-top: 1rem; font-size: 0.88rem; color: rgba(255,255,255,0.8); line-height: 1.65; position: relative;
+    }
+    .callout-insight strong { color: #FDE68A; font-weight: 600; }
+    .nudge-row { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2); }
+    .nudge-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.65); margin-bottom: 0.25rem; }
+    .nudge-num { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.4rem, 2.5vw, 1.75rem); letter-spacing: -0.03em; line-height: 1; color: #FDE68A; }
+    .nudge-aside { font-size: 0.8rem; color: rgba(255,255,255,0.7); line-height: 1.55; }
+    .nudge-aside strong { color: #FDE68A; font-weight: 600; }
+
+    /* Chart card */
+    .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem; }
+    .chart-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem; }
+    .chart-title { font-family: var(--font-display); font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; }
+    .chart-legend { display: flex; gap: 1rem; align-items: center; flex-wrap: wrap; }
+    .legend-item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; color: var(--text-secondary); }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .chart-container { position: relative; height: 300px; }
+
+    /* Email capture */
+    .email-card {
+      background: linear-gradient(135deg, rgba(37,99,235,0.05) 0%, rgba(245,158,11,0.05) 100%);
+      border: 1px solid var(--border); border-radius: 16px; padding: 1.5rem;
+    }
+    .email-card-header { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 1rem; }
+    .email-card-icon { font-size: 1.4rem; line-height: 1; margin-top: 2px; }
+    .email-card-title { font-family: var(--font-display); font-weight: 700; font-size: 1rem; letter-spacing: -0.01em; margin-bottom: 0.2rem; }
+    .email-card-sub { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.55; }
+    .email-form { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+    .email-input {
+      flex: 1; min-width: 200px; padding: 0.7rem 1rem; border: 1px solid var(--border);
+      border-radius: 8px; font-family: var(--font-body); font-size: 0.9rem;
+      background: var(--surface); color: var(--text-primary); outline: none;
+      transition: border-color 0.2s;
+    }
+    .email-input:focus { border-color: var(--accent); }
+    .email-input::placeholder { color: var(--text-muted); }
+    .email-submit {
+      background: var(--accent); color: #fff; border: none; border-radius: 8px;
+      padding: 0.7rem 1.4rem; font-family: var(--font-body); font-size: 0.88rem;
+      font-weight: 600; cursor: pointer; transition: background 0.2s, transform 0.2s; white-space: nowrap;
+    }
+    .email-submit:hover { background: #1d4ed8; transform: translateY(-1px); }
+    .email-disclaimer { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.6rem; }
+
+    /* Methodology */
+    .methodology-row { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; }
+    .methodology-link {
+      font-size: 0.75rem; color: var(--text-muted); background: none; border: none;
+      cursor: pointer; font-family: var(--font-body); text-decoration: underline;
+      text-underline-offset: 2px; transition: color 0.2s; padding: 0;
+    }
+    .methodology-link:hover { color: var(--text-secondary); }
+    .hypothetical-badge {
+      display: inline-block; font-size: 0.68rem; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; background: rgba(245,158,11,0.1); color: #92600a;
+      border: 1px solid rgba(245,158,11,0.25); padding: 0.2rem 0.55rem; border-radius: 4px;
+    }
+
+    /* ── METHODOLOGY MODAL ── */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 200;
+      background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+      align-items: center; justify-content: center; padding: var(--space-md);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface); border-radius: 16px; padding: var(--space-md);
+      max-width: 560px; width: 100%; max-height: 80vh; overflow-y: auto;
+      position: relative; box-shadow: 0 24px 64px rgba(0,0,0,0.15);
+    }
+    .modal-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: none; border: none; cursor: pointer; font-size: 1.25rem;
+      color: var(--text-muted); transition: color 0.2s; line-height: 1;
+    }
+    .modal-close:hover { color: var(--text-primary); }
+    .modal h3 { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em; margin-bottom: 1rem; padding-right: 2rem; }
+    .modal p { font-size: 0.875rem; color: var(--text-secondary); line-height: 1.75; margin-bottom: 0.85rem; }
+    .modal p:last-child { margin-bottom: 0; }
+    .modal p strong { color: var(--text-primary); font-weight: 600; }
+    .modal-disclaimer { font-size: 0.78rem; color: var(--text-muted); background: var(--bg); border-radius: 8px; padding: 0.85rem; line-height: 1.65; margin-top: 1rem; }
+
+    /* ── CTA BAND ── */
+    .cta-band { background: #2563EB; padding: var(--space-xl) var(--space-md); text-align: center; }
+    .section-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: var(--space-sm); }
+    .cta-band .section-label { color: #FDE68A; }
+    .cta-band h2 { font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -0.03em; line-height: 1.1; color: #fff; max-width: 22ch; margin: var(--space-sm) auto var(--space-md); }
+    .cta-band p { font-size: 1rem; color: rgba(255,255,255,0.75); max-width: 40ch; margin: 0 auto var(--space-lg); line-height: 1.7; }
+    .btn-warm { background: #FDE68A; color: #111; padding: 0.9rem 2.2rem; border-radius: 8px; font-family: var(--font-body); font-size: 0.95rem; font-weight: 600; text-decoration: none; transition: background 0.2s, transform 0.2s; box-shadow: 0 4px 20px rgba(0,0,0,0.2); display: inline-block; }
+    .btn-warm:hover { background: #FCD34D; transform: translateY(-2px); }
+
+    /* ── FOOTER ── */
+    footer { padding: var(--space-lg) var(--space-md); border-top: 1px solid var(--border); }
+    .footer-inner { max-width: 1140px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: var(--space-md); }
+    .footer-brand { font-family: var(--font-display); font-weight: 800; font-size: 1rem; color: var(--text-primary); text-decoration: none; }
+    .footer-brand span { color: var(--accent); }
+    .footer-links { display: flex; gap: var(--space-md); list-style: none; }
+    .footer-links a { font-size: 0.85rem; color: var(--text-muted); text-decoration: none; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--text-primary); }
+    .footer-copy { font-size: 0.8rem; color: var(--text-muted); }
+
+    /* ── REVEAL ── */
+    .reveal { opacity: 0; transform: translateY(20px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 960px) {
+      .calc-inner { grid-template-columns: 1fr; }
+      .inputs-panel { position: static; }
+    }
+    @media (max-width: 600px) {
+      nav { padding: 1rem 1rem; }
+      .nav-links { display: none; }
+      .callout-card { grid-template-columns: 1fr; }
+      .footer-inner { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav id="main-nav">
+    <a href="datadan-landing-v0.html" class="nav-brand">Data Dan <span>the Money Man</span></a>
+    <ul class="nav-links">
+      <li><a href="#">About</a></li>
+      <li><a href="#">Services</a></li>
+      <li><a href="#">Tools</a></li>
+      <li><a href="#" class="nav-cta">Work With Me</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-eyebrow">📈 Free Tool</div>
+    <h1>What does <em>1% more</em> actually get you?</h1>
+    <p class="hero-sub">Adjust the sliders and watch your future balance change in real time. The gap between "doing nothing" and "1% more a year" will surprise you.</p>
+  </section>
+
+  <!-- CALCULATOR -->
+  <section class="calc-section">
+    <div class="calc-inner">
+
+      <!-- INPUTS PANEL -->
+      <div class="inputs-panel reveal">
+        <div class="inputs-header">
+          <h3>Your Numbers</h3>
+          <button class="reset-btn" onclick="resetDefaults()">↺ Reset to defaults</button>
+        </div>
+
+        <div class="input-section-label" style="margin-top:0; padding-top:0; border-top:none;">About You</div>
+
+        <div class="input-group">
+          <div class="input-label">
+            <span class="input-label-text">Current Age</span>
+            <span class="val-badge" id="disp-age" onclick="makeEditable('age','int','yrs')">30</span>
+          </div>
+          <input type="range" id="age" min="18" max="65" value="30" step="1" oninput="syncFromSlider('age','int','yrs')" />
+          <div class="range-bounds"><span>18</span><span>65</span></div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-label">
+            <span class="input-label-text">Retirement Age</span>
+            <span class="val-badge" id="disp-retire" onclick="makeEditable('retire','int','yrs')">67</span>
+          </div>
+          <input type="range" id="retire" min="50" max="80" value="67" step="1" oninput="syncFromSlider('retire','int','yrs')" />
+          <div class="range-bounds"><span>50</span><span>80</span></div>
+        </div>
+
+        <div class="input-section-label">Your Income</div>
+
+        <div class="input-group">
+          <div class="input-label">
+            <span class="input-label-text">Annual Salary</span>
+            <span class="val-badge" id="disp-salary" onclick="makeEditable('salary','dollar')">$75,000</span>
+          </div>
+          <input type="range" id="salary" min="20000" max="300000" value="75000" step="1000" oninput="syncFromSlider('salary','dollar')" />
+          <div class="range-bounds"><span>$20K</span><span>$300K</span></div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-label">
+            <span class="input-label-text">Annual Salary Raise</span>
+            <span class="val-badge" id="disp-raise" onclick="makeEditable('raise','pct')">2%</span>
+          </div>
+          <input type="range" id="raise" min="0" max="10" value="2" step="0.5" oninput="syncFromSlider('raise','pct')" />
+          <div class="range-bounds"><span>0%</span><span>10%</span></div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-label">
+            <span class="input-label-text">Current Account Balance</span>
+          </div>
+          <div class="balance-input-wrap">
+            <span class="balance-prefix">$</span>
+            <input type="text" class="balance-field" id="current-balance" value="0" placeholder="0"
+              oninput="formatBalanceInput(this)" onblur="calculate()" />
+          </div>
+        </div>
+
+        <div class="input-section-label">Your Contributions</div>
+
+        <div class="input-group">
+          <div class="input-label">
+            <span class="input-label-text">Current Contribution</span>
+            <span class="val-badge" id="disp-contrib" onclick="makeEditable('contrib','pct')">6%</span>
+          </div>
+          <input type="range" id="contrib" min="1" max="30" value="6" step="0.5" oninput="syncFromSlider('contrib','pct')" />
+          <div class="range-bounds"><span>1%</span><span>30%</span></div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-label">
+            <span class="input-label-text">Auto-Escalation / yr</span>
+            <span class="val-badge" id="disp-escalate" onclick="makeEditable('escalate','pct')">1%</span>
+          </div>
+          <input type="range" id="escalate" min="0.5" max="3" value="1" step="0.5" oninput="syncFromSlider('escalate','pct')" />
+          <div class="range-bounds"><span>0.5%</span><span>3%</span></div>
+        </div>
+
+        <div class="input-group">
+          <div class="input-label">
+            <span class="input-label-text">Escalation Cap</span>
+            <span class="val-badge" id="disp-cap" onclick="makeEditable('cap','pct')">15%</span>
+          </div>
+          <input type="range" id="cap" min="5" max="30" value="15" step="1" oninput="syncFromSlider('cap','pct')" />
+          <div class="range-bounds"><span>5%</span><span>30%</span></div>
+        </div>
+
+        <div class="input-section-label">Growth Assumption</div>
+
+        <div class="input-group">
+          <div class="input-label">
+            <span class="input-label-text">Expected Annual Return</span>
+            <span class="val-badge" id="disp-return" onclick="makeEditable('return','pct')">7%</span>
+          </div>
+          <input type="range" id="return" min="3" max="14" value="7" step="0.5" oninput="syncFromSlider('return','pct')" />
+          <div class="range-bounds"><span>3%</span><span>14%</span></div>
+        </div>
+
+      </div>
+
+      <!-- RESULTS PANEL -->
+      <div class="results-panel">
+
+        <!-- CALLOUT CARD -->
+        <div class="callout-card reveal">
+          <div class="callout-stat">
+            <div class="callout-stat-label">Without Escalation</div>
+            <div class="callout-stat-num" id="result-base">—</div>
+            <div class="callout-stat-sub">staying at your current rate</div>
+          </div>
+          <div class="callout-stat">
+            <div class="callout-stat-label">With Auto-Escalation 🚀</div>
+            <div class="callout-stat-num accent" id="result-escalated">—</div>
+            <div class="callout-stat-sub" id="result-sub">add 1% more each year</div>
+          </div>
+          <div class="callout-insight" id="callout-insight">
+            Adjust the sliders to see your personalized projection.
+          </div>
+          <div class="nudge-row" id="nudge-row" style="display:none;">
+            <div>
+              <div class="nudge-label" id="nudge-label">What if you escalated 2% per year?</div>
+              <div class="nudge-num" id="nudge-num">—</div>
+            </div>
+            <div class="nudge-aside">That's another <strong id="nudge-diff">—</strong><br/>without changing anything else.</div>
+          </div>
+        </div>
+
+        <!-- CHART -->
+        <div class="chart-card reveal">
+          <div class="chart-header">
+            <div class="chart-title">Balance Over Time</div>
+            <div class="chart-legend">
+              <div class="legend-item"><div class="legend-dot" style="background:#2563EB;"></div>With escalation</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#CCCCCC;"></div>Without escalation</div>
+              <div class="legend-item">
+                <div style="width:10px;height:10px;border-radius:2px;background:rgba(37,99,235,0.12);border:1px solid rgba(37,99,235,0.25);"></div>
+                The gap
+              </div>
+            </div>
+          </div>
+          <div class="chart-container">
+            <canvas id="growthChart"></canvas>
+          </div>
+        </div>
+
+        <!-- EMAIL CAPTURE -->
+        <div class="email-card reveal">
+          <div class="email-card-header">
+            <div class="email-card-icon">📬</div>
+            <div>
+              <div class="email-card-title">Email me my results</div>
+              <div class="email-card-sub">Get a personalized report with your projection, a breakdown of contributions year by year, and a note from Data Dan on your next move.</div>
+            </div>
+          </div>
+          <div class="email-form">
+            <input type="email" class="email-input" placeholder="your@email.com" id="email-input" />
+            <button class="email-submit" onclick="handleEmailSubmit()">Send My Report →</button>
+          </div>
+          <div class="email-disclaimer">No spam. One email with your report. Unsubscribe anytime.</div>
+        </div>
+
+        <!-- METHODOLOGY ROW -->
+        <div class="methodology-row">
+          <span class="hypothetical-badge">⚠️ Hypothetical</span>
+          <button class="methodology-link" onclick="document.getElementById('methodology-modal').classList.add('open')">How is this calculated?</button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta-band">
+    <p class="section-label">Want to go deeper?</p>
+    <h2>Numbers are just the start.</h2>
+    <p>Understanding the math is step one. Let's talk about turning these projections into a real plan.</p>
+    <a href="#" class="btn-warm">Work With Me</a>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <a href="datadan-landing-v0.html" class="footer-brand">Data Dan <span>the Money Man</span></a>
+      <ul class="footer-links">
+        <li><a href="#">Instagram</a></li>
+        <li><a href="#">Substack</a></li>
+        <li><a href="#">About</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+      <span class="footer-copy">© 2026 Data Dan the Money Man</span>
+    </div>
+  </footer>
+
+  <!-- METHODOLOGY MODAL -->
+  <div class="modal-overlay" id="methodology-modal" onclick="closeModalOnOverlay(event)">
+    <div class="modal">
+      <button class="modal-close" onclick="document.getElementById('methodology-modal').classList.remove('open')">✕</button>
+      <h3>How this calculator works</h3>
+      <p><strong>Compounding:</strong> This calculator uses monthly compounding — the same way real 401(k) and investment accounts work. Your contributions are deposited each month and begin earning returns immediately. Returns compound every month at 1/12th of the annual rate.</p>
+      <p><strong>Contributions:</strong> Your annual salary is divided into 12 equal monthly contributions based on your contribution percentage. As your salary grows each year (via the annual raise input), your contribution amounts grow proportionally.</p>
+      <p><strong>Auto-escalation:</strong> Your contribution percentage increases by the escalation amount at the end of each year, until it reaches the cap you set. For example, starting at 6% with 1% escalation and a 15% cap means: year 1 = 6%, year 2 = 7%, ..., year 10 = 15%, year 11+ = 15%.</p>
+      <p><strong>Salary growth:</strong> Your salary is assumed to grow at the annual raise percentage each year, compounding year over year. This increases your dollar contribution amount even if your contribution rate stays the same.</p>
+      <p><strong>Without escalation baseline:</strong> The comparison scenario holds your contribution percentage fixed at your starting rate for the entire projection period, while still applying the same salary growth and return assumptions.</p>
+      <div class="modal-disclaimer">
+        ⚠️ All projections are hypothetical and for illustrative purposes only. This calculator does not account for taxes, employer match, inflation, investment fees, 401(k) contribution limits, or changes in income beyond the stated raise. Results should not be considered personalized financial advice. Past investment returns do not guarantee future results.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── DEFAULTS ──
+    const DEFAULTS = {
+      age: 30, retire: 67, salary: 75000, raise: 2,
+      contrib: 6, escalate: 1, cap: 15, return: 7
+    };
+
+    // ── NAV SCROLL ──
+    const nav = document.getElementById('main-nav');
+    window.addEventListener('scroll', () => nav.classList.toggle('scrolled', window.scrollY > 40));
+
+    // ── REVEAL ──
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    // ── BALANCE INPUT FORMATTER ──
+    function formatBalanceInput(el) {
+      let raw = el.value.replace(/[^0-9]/g, '');
+      if (raw === '') raw = '0';
+      el.value = parseInt(raw).toLocaleString();
+      calculate();
+    }
+    function getBalanceValue() {
+      const raw = document.getElementById('current-balance').value.replace(/[^0-9]/g, '');
+      return raw ? parseInt(raw) : 0;
+    }
+
+    // ── FORMAT HELPERS ──
+    function fmtDisplay(id, type) {
+      const v = parseFloat(document.getElementById(id).value);
+      if (type === 'dollar') return '$' + Math.round(v).toLocaleString();
+      if (type === 'pct')    return v + '%';
+      if (type === 'int')    return Math.round(v).toString();
+      return v;
+    }
+
+    function fmtLarge(n) {
+      if (n >= 1000000) return '$' + (n / 1000000).toFixed(2) + 'M';
+      return '$' + Math.round(n).toLocaleString();
+    }
+
+    // ── SYNC SLIDER → DISPLAY ──
+    function syncFromSlider(id, type) {
+      document.getElementById('disp-' + id).textContent = fmtDisplay(id, type);
+      calculate();
+    }
+
+    // ── EDITABLE VALUE BADGE ──
+    function makeEditable(id, type, suffix) {
+      const badge = document.getElementById('disp-' + id);
+      const slider = document.getElementById(id);
+      const current = parseFloat(slider.value);
+
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'val-input-inline';
+      input.value = current;
+      input.style.width = '72px';
+
+      badge.replaceWith(input);
+      input.focus();
+      input.select();
+
+      function commit() {
+        let val = parseFloat(input.value.replace(/[^0-9.]/g, ''));
+        if (isNaN(val)) val = current;
+        val = Math.min(Math.max(val, parseFloat(slider.min)), parseFloat(slider.max));
+        slider.value = val;
+
+        const newBadge = document.createElement('span');
+        newBadge.className = 'val-badge';
+        newBadge.id = 'disp-' + id;
+        newBadge.onclick = () => makeEditable(id, type, suffix);
+        newBadge.textContent = fmtDisplay(id, type);
+        input.replaceWith(newBadge);
+        calculate();
+      }
+
+      input.addEventListener('blur', commit);
+      input.addEventListener('keydown', e => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') { input.value = current; commit(); } });
+    }
+
+    // ── RESET TO DEFAULTS ──
+    function resetDefaults() {
+      Object.entries(DEFAULTS).forEach(([id, val]) => {
+        const slider = document.getElementById(id);
+        if (slider) slider.value = val;
+      });
+      // Refresh all display badges
+      document.getElementById('current-balance').value = '0';
+      const typeMap = { age:'int', retire:'int', salary:'dollar', raise:'pct', contrib:'pct', escalate:'pct', cap:'pct', return:'pct' };
+      Object.keys(DEFAULTS).forEach(id => {
+        const badge = document.getElementById('disp-' + id);
+        if (badge) badge.textContent = fmtDisplay(id, typeMap[id]);
+      });
+      calculate();
+    }
+
+    // ── CHART INSTANCE ──
+    let chart = null;
+
+    // ── CALCULATE ──
+    function calculate() {
+      const age      = parseInt(document.getElementById('age').value);
+      const retire   = parseInt(document.getElementById('retire').value);
+      const salary   = parseFloat(document.getElementById('salary').value);
+      const raise    = parseFloat(document.getElementById('raise').value) / 100;
+      const contrib  = parseFloat(document.getElementById('contrib').value) / 100;
+      const escalate = parseFloat(document.getElementById('escalate').value) / 100;
+      const cap      = parseFloat(document.getElementById('cap').value) / 100;
+      const ret      = parseFloat(document.getElementById('return').value) / 100;
+
+      if (retire <= age) {
+        document.getElementById('callout-insight').innerHTML = '<strong>Heads up:</strong> Retirement age must be greater than current age.';
+        return;
+      }
+
+      const monthlyRate = ret / 12;
+      const years = retire - age;
+      const labels = [];
+      const baseData = [];
+      const escData = [];
+      const startingBalance = getBalanceValue();
+
+      let baseBal = startingBalance, escBal = startingBalance;
+      let escRate = contrib;
+      let currentSalary = salary;
+
+      for (let y = 0; y < years; y++) {
+        labels.push(age + y);
+        const baseMonthly = (currentSalary * contrib) / 12;
+        const escMonthly  = (currentSalary * escRate) / 12;
+
+        for (let m = 0; m < 12; m++) {
+          baseBal = baseBal * (1 + monthlyRate) + baseMonthly;
+          escBal  = escBal  * (1 + monthlyRate) + escMonthly;
+        }
+
+        escRate = Math.min(escRate + escalate, cap);
+        currentSalary = currentSalary * (1 + raise);
+
+        baseData.push(Math.round(baseBal));
+        escData.push(Math.round(escBal));
+      }
+
+      const finalBase = baseData[baseData.length - 1];
+      const finalEsc  = escData[escData.length - 1];
+      const diff      = finalEsc - finalBase;
+      const pct       = ((diff / finalBase) * 100).toFixed(0);
+      const escPctFinal = Math.min(contrib + escalate * years, cap) * 100;
+
+      // Update callout
+      document.getElementById('result-base').textContent      = fmtLarge(finalBase);
+      document.getElementById('result-escalated').textContent = fmtLarge(finalEsc);
+      document.getElementById('result-sub').textContent       = `+${(escalate*100).toFixed(1)}% per year, capped at ${(cap*100).toFixed(0)}%`;
+      document.getElementById('callout-insight').innerHTML =
+        `Auto-escalation adds <strong>${fmtLarge(diff)}</strong> to your retirement — that's <strong>${pct}% more</strong> than staying put. ` +
+        `${diff > 500000 ? "That's life-changing money from one small habit." : "Small annual increases add up to a gap that's hard to ignore."}`;
+
+      // ── NUDGE ROW: one escalation step higher ──
+      const nudgeRate = Math.min(escalate + 0.01, 0.30);
+      if (nudgeRate > escalate && contrib < cap) {
+        const nudgeCap = Math.max(cap, nudgeRate);
+        let nudgeBal = 0, nudgeContrib = contrib, nudgeSalary = salary;
+        for (let y = 0; y < years; y++) {
+          const nm = (nudgeSalary * nudgeContrib) / 12;
+          for (let m = 0; m < 12; m++) nudgeBal = nudgeBal * (1 + monthlyRate) + nm;
+          nudgeContrib = Math.min(nudgeContrib + nudgeRate, nudgeCap);
+          nudgeSalary  = nudgeSalary * (1 + raise);
+        }
+        const nudgeDiff = nudgeBal - finalEsc;
+        const nudgeEscPct = (nudgeRate * 100).toFixed(1).replace('.0', '');
+        document.getElementById('nudge-label').textContent = `What if you escalated ${nudgeEscPct}% per year instead?`;
+        document.getElementById('nudge-num').textContent   = fmtLarge(nudgeBal);
+        document.getElementById('nudge-diff').textContent  = fmtLarge(nudgeDiff);
+        document.getElementById('nudge-row').style.display = 'flex';
+      } else {
+        document.getElementById('nudge-row').style.display = 'none';
+      }
+
+      // Chart
+      const ctx = document.getElementById('growthChart').getContext('2d');
+      if (chart) chart.destroy();
+      Chart.register(Chart.Filler);
+
+      chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'With Escalation',
+              data: escData,
+              borderColor: '#2563EB',
+              borderWidth: 2.5,
+              pointRadius: 0,
+              tension: 0.4,
+              fill: { target: 1, above: 'rgba(37,99,235,0.10)' },
+              order: 1,
+            },
+            {
+              label: 'Without Escalation',
+              data: baseData,
+              borderColor: '#CCCCCC',
+              borderWidth: 2,
+              pointRadius: 0,
+              tension: 0.4,
+              fill: false,
+              order: 2,
+            },
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#111',
+              titleColor: 'rgba(255,255,255,0.5)',
+              bodyColor: '#fff',
+              padding: 12, cornerRadius: 8,
+              callbacks: {
+                title: ctx => 'Age ' + ctx[0].label,
+                label: ctx => ctx.dataset.label + ': ' + fmtLarge(ctx.parsed.y),
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(0,0,0,0.04)' },
+              ticks: { color: '#999', font: { family: "'DM Sans', sans-serif", size: 11 }, maxTicksLimit: 8, callback: v => 'Age ' + v },
+              border: { display: false }
+            },
+            y: {
+              grid: { color: 'rgba(0,0,0,0.04)' },
+              ticks: {
+                color: '#999', font: { family: "'DM Sans', sans-serif", size: 11 },
+                callback: v => v >= 1000000 ? '$' + (v/1000000).toFixed(1) + 'M' : '$' + (v/1000).toFixed(0) + 'K'
+              },
+              border: { display: false }
+            }
+          }
+        }
+      });
+    }
+
+    // ── EMAIL SUBMIT (PLACEHOLDER) ──
+    function handleEmailSubmit() {
+      const email = document.getElementById('email-input').value.trim();
+      if (!email || !email.includes('@')) {
+        document.getElementById('email-input').style.borderColor = '#ef4444';
+        setTimeout(() => document.getElementById('email-input').style.borderColor = '', 1500);
+        return;
+      }
+      const btn = document.querySelector('.email-submit');
+      btn.textContent = '✓ Report on its way!';
+      btn.style.background = '#16a34a';
+      btn.disabled = true;
+      // TODO: wire to email service (ConvertKit, Mailchimp, etc.)
+    }
+
+    // ── MODAL CLOSE ON OVERLAY ──
+    function closeModalOnOverlay(e) {
+      if (e.target === document.getElementById('methodology-modal')) {
+        document.getElementById('methodology-modal').classList.remove('open');
+      }
+    }
+
+    // ── INIT ──
+    calculate();
+  </script>
+
+</body>
+</html>
