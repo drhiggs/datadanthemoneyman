@@ -174,29 +174,29 @@
 
     /* Callout card */
     .callout-card {
-      background: #2563EB; border-radius: 16px;
+      background: var(--accent); border-radius: 16px;
       padding: 1.75rem; display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
       position: relative; overflow: hidden;
     }
     .callout-card::before {
       content: ''; position: absolute; inset: 0;
-      background: radial-gradient(ellipse 70% 80% at 80% 50%, rgba(255,255,255,0.1) 0%, transparent 70%);
+      background: radial-gradient(ellipse 70% 80% at 80% 50%, rgba(255,255,255,0.08) 0%, transparent 70%);
       pointer-events: none;
     }
     .callout-stat { position: relative; }
-    .callout-stat-label { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.65); margin-bottom: 0.4rem; }
+    .callout-stat-label { font-size: 0.72rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 0.4rem; }
     .callout-stat-num { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.8rem, 3.5vw, 2.5rem); letter-spacing: -0.03em; line-height: 1; color: #fff; }
     .callout-stat-num.accent { color: #FDE68A; }
-    .callout-stat-sub { font-size: 0.75rem; color: rgba(255,255,255,0.6); margin-top: 0.3rem; }
+    .callout-stat-sub { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 0.3rem; }
     .callout-insight {
-      grid-column: 1 / -1; border-top: 1px solid rgba(255,255,255,0.2);
+      grid-column: 1 / -1; border-top: 1px solid rgba(255,255,255,0.15);
       padding-top: 1rem; font-size: 0.88rem; color: rgba(255,255,255,0.8); line-height: 1.65; position: relative;
     }
     .callout-insight strong { color: #FDE68A; font-weight: 600; }
-    .nudge-row { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2); }
-    .nudge-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.65); margin-bottom: 0.25rem; }
+    .nudge-row { display: flex; align-items: center; gap: 1rem; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.12); }
+    .nudge-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.6); margin-bottom: 0.25rem; }
     .nudge-num { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.4rem, 2.5vw, 1.75rem); letter-spacing: -0.03em; line-height: 1; color: #FDE68A; }
-    .nudge-aside { font-size: 0.8rem; color: rgba(255,255,255,0.7); line-height: 1.55; }
+    .nudge-aside { font-size: 0.8rem; color: rgba(255,255,255,0.6); line-height: 1.55; }
     .nudge-aside strong { color: #FDE68A; font-weight: 600; }
 
     /* Chart card */
@@ -273,13 +273,13 @@
     .modal-disclaimer { font-size: 0.78rem; color: var(--text-muted); background: var(--bg); border-radius: 8px; padding: 0.85rem; line-height: 1.65; margin-top: 1rem; }
 
     /* ── CTA BAND ── */
-    .cta-band { background: #2563EB; padding: var(--space-xl) var(--space-md); text-align: center; }
+    .cta-band { background: var(--accent); padding: var(--space-xl) var(--space-md); text-align: center; }
     .section-label { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: var(--space-sm); }
     .cta-band .section-label { color: #FDE68A; }
     .cta-band h2 { font-family: var(--font-display); font-weight: 800; font-size: clamp(2rem, 4vw, 3rem); letter-spacing: -0.03em; line-height: 1.1; color: #fff; max-width: 22ch; margin: var(--space-sm) auto var(--space-md); }
-    .cta-band p { font-size: 1rem; color: rgba(255,255,255,0.75); max-width: 40ch; margin: 0 auto var(--space-lg); line-height: 1.7; }
-    .btn-warm { background: #FDE68A; color: #111; padding: 0.9rem 2.2rem; border-radius: 8px; font-family: var(--font-body); font-size: 0.95rem; font-weight: 600; text-decoration: none; transition: background 0.2s, transform 0.2s; box-shadow: 0 4px 20px rgba(0,0,0,0.2); display: inline-block; }
-    .btn-warm:hover { background: #FCD34D; transform: translateY(-2px); }
+    .cta-band p { font-size: 1rem; color: rgba(255,255,255,0.7); max-width: 40ch; margin: 0 auto var(--space-lg); line-height: 1.7; }
+    .btn-warm { background: #FDE68A; color: #111; padding: 0.9rem 2.2rem; border-radius: 8px; font-family: var(--font-body); font-size: 0.95rem; font-weight: 600; text-decoration: none; transition: background 0.2s, transform 0.2s; box-shadow: 0 4px 20px rgba(0,0,0,0.15); display: inline-block; }
+    .btn-warm:hover { background: #fcd34d; transform: translateY(-2px); }
 
     /* ── FOOTER ── */
     footer { padding: var(--space-lg) var(--space-md); border-top: 1px solid var(--border); }
@@ -477,20 +477,27 @@
           </div>
         </div>
 
-        <!-- EMAIL CAPTURE -->
+
+        <!-- COACHING CTA CARD -->
         <div class="email-card reveal">
           <div class="email-card-header">
-            <div class="email-card-icon">📬</div>
+            <div class="email-card-icon">📋</div>
             <div>
-              <div class="email-card-title">Email me my results</div>
-              <div class="email-card-sub">Get a personalized report with your projection, a breakdown of contributions year by year, and a note from Data Dan on your next move.</div>
+              <div class="email-card-title">Want to turn these numbers into a real plan?</div>
+              <div class="email-card-sub">Numbers on a screen are step one. Book a session with Data Dan and let's build a clear, prioritized plan around your actual situation.</div>
             </div>
           </div>
-          <div class="email-form">
-            <input type="email" class="email-input" placeholder="your@email.com" id="email-input" />
-            <button class="email-submit" onclick="handleEmailSubmit()">Send My Report →</button>
+          <div style="margin-top: 0.75rem;">
+            <a href="/datadan-coaching-v2.html#intake" style="display:inline-block; background: var(--accent); color: #fff; padding: 0.75rem 1.75rem; border-radius: 8px; font-family: var(--font-body); font-size: 0.9rem; font-weight: 600; text-decoration: none; transition: background 0.2s, transform 0.2s;" onmouseover="this.style.background='#1d4ed8'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='#2563EB'; this.style.transform='translateY(0)'">Book a Session →</a>
           </div>
-          <div class="email-disclaimer">No spam. One email with your report. Unsubscribe anytime.</div>
+        </div>
+
+        <!-- COMPOUNDING TRANSPARENCY NOTE -->
+        <div class="methodology-row" style="justify-content: flex-start; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 0.85rem 1rem; gap: 0.6rem; align-items: flex-start;">
+          <span style="font-size: 1rem; flex-shrink:0;">📐</span>
+          <p style="font-size: 0.78rem; color: var(--text-muted); line-height: 1.65; margin:0;">
+            <strong style="color: var(--text-secondary);">Monthly vs. annual compounding:</strong> This calculator uses monthly compounding — the way real 401k contributions work (contributions come out of every paycheck and start earning immediately). Some calculators use annual compounding, which will show slightly lower results. The difference is typically 5–9% on long time horizons.
+          </p>
         </div>
 
         <!-- METHODOLOGY ROW -->
@@ -535,6 +542,7 @@
       <p><strong>Auto-escalation:</strong> Your contribution percentage increases by the escalation amount at the end of each year, until it reaches the cap you set. For example, starting at 6% with 1% escalation and a 15% cap means: year 1 = 6%, year 2 = 7%, ..., year 10 = 15%, year 11+ = 15%.</p>
       <p><strong>Salary growth:</strong> Your salary is assumed to grow at the annual raise percentage each year, compounding year over year. This increases your dollar contribution amount even if your contribution rate stays the same.</p>
       <p><strong>Without escalation baseline:</strong> The comparison scenario holds your contribution percentage fixed at your starting rate for the entire projection period, while still applying the same salary growth and return assumptions.</p>
+      <p><strong>Why might results differ slightly from other calculators?</strong> Small differences in results between this calculator and others (such as UBT or Fidelity) are normal. Variations stem from differences in how salary growth is applied (beginning vs. end of year), rounding methods, and compounding intervals. Our calculator uses true monthly compounding applied at the start of each month. Results may run slightly higher than some tools as a result.</p>
       <div class="modal-disclaimer">
         ⚠️ All projections are hypothetical and for illustrative purposes only. This calculator does not account for taxes, employer match, inflation, investment fees, 401(k) contribution limits, or changes in income beyond the stated raise. Results should not be considered personalized financial advice. Past investment returns do not guarantee future results.
       </div>
@@ -698,15 +706,20 @@
       document.getElementById('result-base').textContent      = fmtLarge(finalBase);
       document.getElementById('result-escalated').textContent = fmtLarge(finalEsc);
       document.getElementById('result-sub').textContent       = `+${(escalate*100).toFixed(1)}% per year, capped at ${(cap*100).toFixed(0)}%`;
+      const yearsToCapBase = contrib >= cap ? 0 : Math.ceil((cap - contrib) / escalate);
+      const capNote = yearsToCapBase <= years
+        ? ` Your contribution rate reaches the <strong>${(cap*100).toFixed(0)}% cap</strong> in ~${yearsToCapBase} year${yearsToCapBase !== 1 ? 's' : ''} — raising the cap lets escalation work longer.`
+        : '';
       document.getElementById('callout-insight').innerHTML =
         `Auto-escalation adds <strong>${fmtLarge(diff)}</strong> to your retirement — that's <strong>${pct}% more</strong> than staying put. ` +
-        `${diff > 500000 ? "That's life-changing money from one small habit." : "Small annual increases add up to a gap that's hard to ignore."}`;
+        `${diff > 500000 ? "That's life-changing money from one small habit." : "Small annual increases add up to a gap that's hard to ignore."}` +
+        capNote;
 
       // ── NUDGE ROW: one escalation step higher ──
       const nudgeRate = Math.min(escalate + 0.01, 0.30);
       if (nudgeRate > escalate && contrib < cap) {
         const nudgeCap = Math.max(cap, nudgeRate);
-        let nudgeBal = 0, nudgeContrib = contrib, nudgeSalary = salary;
+        let nudgeBal = startingBalance, nudgeContrib = contrib, nudgeSalary = salary;
         for (let y = 0; y < years; y++) {
           const nm = (nudgeSalary * nudgeContrib) / 12;
           for (let m = 0; m < 12; m++) nudgeBal = nudgeBal * (1 + monthlyRate) + nm;
