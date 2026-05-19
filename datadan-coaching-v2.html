@@ -945,12 +945,18 @@
       if (!isOpen) item.classList.add('open');
     }
 
-    // ── FORM SUBMIT (PLACEHOLDER) ──
-    function handleFormSubmit() {
+    // ── FORM SUBMIT — Formspree ──
+    async function handleFormSubmit() {
       const first = document.getElementById('f-first').value.trim();
+      const last  = document.getElementById('f-last').value.trim();
       const email = document.getElementById('f-email').value.trim();
       const pkg   = document.getElementById('f-package').value;
+      const addon = document.getElementById('f-addon').checked;
+      const format    = document.getElementById('f-format').value;
+      const source    = document.getElementById('f-source').value;
+      const challenge = document.getElementById('f-challenge').value.trim();
 
+      // Validation
       if (!first || !email || !pkg) {
         if (!first) document.getElementById('f-first').style.borderColor = '#ef4444';
         if (!email) document.getElementById('f-email').style.borderColor = '#ef4444';
@@ -963,9 +969,38 @@
         return;
       }
 
-      // TODO: wire to form service (Formspree, Netlify Forms, ConvertKit, etc.)
-      document.getElementById('intake-form').style.display = 'none';
-      document.getElementById('form-success').style.display = 'block';
+      // Disable button while sending
+      const btn = document.querySelector('.form-submit');
+      btn.textContent = 'Sending…';
+      btn.disabled = true;
+
+      try {
+        const response = await fetch('https://formspree.io/f/xnjwzzve', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            'First Name': first,
+            'Last Name': last,
+            'Email': email,
+            'Package': pkg,
+            'Add Zero It Out': addon ? 'Yes' : 'No',
+            'Session Format': format,
+            'How They Found Me': source,
+            'Biggest Challenge': challenge
+          })
+        });
+
+        if (response.ok) {
+          document.getElementById('intake-form').style.display = 'none';
+          document.getElementById('form-success').style.display = 'block';
+        } else {
+          btn.textContent = 'Something went wrong — try again';
+          btn.disabled = false;
+        }
+      } catch (err) {
+        btn.textContent = 'Something went wrong — try again';
+        btn.disabled = false;
+      }
     }
   </script>
 
